@@ -27,16 +27,16 @@ def post_endpoint():
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
-        return "No file part", 400
+        return jsonify({"msg": "No file part"}), 400
 
     file = request.files['file']
     if file.filename == '':
-        return "No selected file", 400
+        return jsonify({"msg": "No selected file"}), 400
 
     if file:
         filename = file.filename
         file.save(os.path.join('uploads', filename))
-        return f"File {filename} uploaded successfully", 200
+        return jsonify({"msg": "success"}), 200
 
 
 @app.route('/download', methods=['GET'])

@@ -15,7 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 5000
 
 # Define environment variables
-ENV FLASK_APP=main.py
+ENV FLASK_APP=sample_app.py
 ENV FLASK_RUN_HOST=0.0.0.0
 
 # Run the application
