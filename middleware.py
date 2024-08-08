@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 producer = KafkaProducer(
     bootstrap_servers=[os.getenv('KAFKA_URL')],
     value_serializer=lambda x: json.dumps(x).encode('utf-8'),
-    batch_size=int(os.getenv('KAFKA_BATCH_SIZE', '100')),
-    linger_ms=int(os.getenv('KAFKA_BATCH_TIMEOUT', '10'))
+    batch_size=int(os.getenv('KAFKA_BATCH_SIZE', '999900')),
+    linger_ms=int(os.getenv('KAFKA_BATCH_TIMEOUT', '10000'))
 )
 topic = os.getenv('KAFKA_TOPIC', 'akto.api.logs')
 MAX_PAYLOAD_SIZE = int(os.getenv('MAX_PAYLOAD_SIZE', '100000'))
@@ -31,6 +31,9 @@ def log_request():
 
 def log_response(response):
     if response.content_type and 'json' in response.content_type:
+        if g.request_payload_too_big:
+            logger.warning("Request payload too big, skipping logging.")
+            return response
         resp_payload = response.get_data(as_text=True)
         log_data = {
             "akto_account_id": os.getenv("AKTO_ACCOUNT_ID"),
