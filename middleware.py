@@ -10,47 +10,13 @@ from kafka import KafkaProducer
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
 
-
-class ResponseWrapper:
-    def __init__(self, response):
-        self.response = response
-        self.headers = dict(response.headers)
-        self.status_code = response.status_code
-        self.body = b""
-
-    def write(self, data):
-        self.body += data
-        return data
-
-
-class StreamWrapper:
-    def __init__(self, response):
-        self.response = response
-        self.headers = dict(response.headers)
-        self.status_code = response.status_code
-        self.body = b""
-
-    def write(self, data):
-        self.body += data
-        return data
-
-    def stream(self):
-        for chunk in self.response.response:
-            self.write(chunk)
-            yield chunk
-
-
-def get_kafka_producer():
-    kafka_url = os.getenv('KAFKA_URL')
-    topic = os.getenv('KAFKA_TOPIC', 'akto.api.logs')
-    producer = KafkaProducer(
-        bootstrap_servers=[kafka_url],
-        value_serializer=lambda x: json.dumps(x).encode('utf-8')
-    )
-    return producer, topic
-
-
-producer, topic = get_kafka_producer()
+producer = KafkaProducer(
+    bootstrap_servers=[os.getenv('KAFKA_URL')],
+    value_serializer=lambda x: json.dumps(x).encode('utf-8'),
+    batch_size=int(os.getenv('KAFKA_BATCH_SIZE', '100')),
+    linger_ms=int(os.getenv('KAFKA_BATCH_TIMEOUT', '10'))
+)
+topic = os.getenv('KAFKA_TOPIC', 'akto.api.logs')
 MAX_PAYLOAD_SIZE = int(os.getenv('MAX_PAYLOAD_SIZE', '100000'))
 
 
@@ -65,10 +31,6 @@ def log_request():
 
 def log_response(response):
     if response.content_type and 'json' in response.content_type:
-        if g.request_payload_too_big:
-            logger.warning("Request payload too large, skipping payload logging.")
-            return response
-
         resp_payload = response.get_data(as_text=True)
         log_data = {
             "akto_account_id": os.getenv("AKTO_ACCOUNT_ID"),
