@@ -42,7 +42,7 @@ class StreamWrapper:
 
 def get_kafka_producer():
     kafka_url = os.getenv('KAFKA_URL')
-    topic = os.getenv('KAFKA_TOPIC')
+    topic = os.getenv('KAFKA_TOPIC', 'akto.api.logs')
     producer = KafkaProducer(
         bootstrap_servers=[kafka_url],
         value_serializer=lambda x: json.dumps(x).encode('utf-8')
