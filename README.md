@@ -16,7 +16,7 @@ MAX_PAYLOAD_SIZE=100000 # This is an optional parameter, default value is 100000
 KAFKA_BATCH_SIZE=999900 # This is an optional parameter, default value is 999900. This is the number of requests that will be batched together before sending to kafka
 KAFKA_BATCH_TIMEOUT=10000 # This is an optional parameter, default value is 10000. This is the time in milliseconds after which the batch will be sent to kafka
 ```
-4. Add `kafka-python` dependency in your requirements.txt file.
+4. Add `confluent_kafka` dependency in your requirements.txt file.
 5. Now you can start your application and the middleware will start working.
 
 You can refer the sample_app.py to see how the middleware is integrated with a flask application.
