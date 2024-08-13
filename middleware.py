@@ -5,17 +5,17 @@ import time
 from io import BytesIO
 
 from flask import request, g
-from kafka import KafkaProducer
+from confluent_kafka import Producer
 
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
 
-producer = KafkaProducer(
-    bootstrap_servers=[os.getenv('KAFKA_URL')],
-    value_serializer=lambda x: json.dumps(x).encode('utf-8'),
-    batch_size=int(os.getenv('KAFKA_BATCH_SIZE', '999900')),
-    linger_ms=int(os.getenv('KAFKA_BATCH_TIMEOUT', '10000'))
-)
+conf = {
+    'bootstrap.servers': os.getenv('KAFKA_URL'),
+    'batch.num.messages': int(os.getenv('KAFKA_BATCH_SIZE', '999900')),
+    'linger.ms': int(os.getenv('KAFKA_BATCH_TIMEOUT', '10000'))
+}
+producer = Producer(**conf)
 topic = os.getenv('KAFKA_TOPIC', 'akto.api.logs')
 MAX_PAYLOAD_SIZE = int(os.getenv('MAX_PAYLOAD_SIZE', '100000'))
 
@@ -52,12 +52,10 @@ def log_response(response):
         }
 
         try:
-            producer.send(topic, value=log_data)
-            logger.info("Data sent to Kafka.")
+            producer.produce(topic, value=json.dumps(log_data).encode('utf-8'))
+            producer.poll(0)
         except Exception as e:
             logger.error(f"Kafka send error: {e}")
-    else:
-        logger.warning("Non-JSON response, skipping logging.")
     return response
 
 
