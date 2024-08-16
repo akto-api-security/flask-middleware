@@ -1,6 +1,6 @@
 ### Steps to add flask middleware 
 
-1. Copy and paste the middleware.py file in your project directory.
+1. Copy and paste the middleware.py file in your project directory. Add `confluent_kafka` to your requirements.txt file
 2. In your application, where you are initializing flask app, import the middleware.py file and add the following line of code.
 ```python
 from middleware import setup_middleware
