@@ -93,7 +93,8 @@ def log_response(response):
                 "statusCode": str(response.status_code),
                 "type": request.environ.get('SERVER_PROTOCOL'),
                 "status": friendlyHttpStatus[str(response.status_code)],
-                "contentType": response.headers.get('Content-Type')
+                "source": "MIRRORING",
+                "akto_vxlan_id": "0",
             }
 
             try:
